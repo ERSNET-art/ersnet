@@ -9,26 +9,44 @@
 
 <style>
 body {
+  margin: 0;
   font-family: 'Poppins', sans-serif;
   background: linear-gradient(135deg, #0f2a44, #1e5fa8);
-  margin: 0;
   color: white;
+  overflow-x: hidden;
 }
 
+/* HEADER */
+.header {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.logo-left, .logo-right {
+  width: 110px;
+}
+
+/* CONTAINER */
 .container {
   max-width: 500px;
-  margin: 50px auto;
+  margin: 120px auto 50px;
   background: white;
   color: black;
-  padding: 30px;
+  padding: 25px;
   border-radius: 15px;
 }
 
+/* TITLE */
 h2 {
   text-align: center;
 }
 
-input, textarea {
+/* INPUT */
+input, textarea, select {
   width: 100%;
   padding: 12px;
   margin-top: 10px;
@@ -37,6 +55,7 @@ input, textarea {
   border: 1px solid #ccc;
 }
 
+/* BUTTON */
 button {
   width: 100%;
   padding: 15px;
@@ -51,11 +70,47 @@ button {
 button:hover {
   background: #0f2a44;
 }
+
+/* PAKET LIST */
+.paket-list {
+  background: #f1f1f1;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+/* CHARACTER */
+.character {
+  position: fixed;
+  right: 10px;
+  bottom: 0;
+  width: 260px;
+  z-index: 10;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .character {
+    width: 140px;
+  }
+
+  .logo-left, .logo-right {
+    width: 80px;
+  }
+}
 </style>
 </head>
 
 <body>
 
+<!-- HEADER -->
+<div class="header">
+  <img src="L_LDP.png" class="logo-left">
+  <img src="L_ERS.png" class="logo-right">
+</div>
+
+<!-- FORM -->
 <div class="container">
   <h2>Form Pasang Baru</h2>
 
@@ -63,8 +118,29 @@ button:hover {
   <input type="text" id="nohp" placeholder="Nomor WhatsApp">
   <textarea id="alamat" placeholder="Alamat Lengkap"></textarea>
 
+  <!-- PILIH PAKET -->
+  <select id="paket">
+    <option value="">Pilih Paket</option>
+    <option>15 Mbps - 125rb</option>
+    <option>20 Mbps - 150rb</option>
+    <option>35 Mbps - 175rb</option>
+    <option>55 Mbps - 230rb</option>
+  </select>
+
+  <!-- DAFTAR PAKET -->
+  <div class="paket-list">
+    <b>Daftar Paket:</b><br>
+    • 15 Mbps - Rp125.000<br>
+    • 20 Mbps - Rp150.000<br>
+    • 35 Mbps - Rp175.000<br>
+    • 55 Mbps - Rp230.000
+  </div>
+
   <button onclick="kirimData()">Kirim</button>
 </div>
+
+<!-- KARAKTER -->
+<img src="cs.png" class="character">
 
 <script>
 function kirimData() {
@@ -72,19 +148,22 @@ function kirimData() {
   var data = {
     nama: document.getElementById("nama").value,
     nohp: document.getElementById("nohp").value,
-    alamat: document.getElementById("alamat").value
+    alamat: document.getElementById("alamat").value,
+    paket: document.getElementById("paket").value
   };
 
-  fetch("https://script.google.com/macros/s/AKfycbyH-qNN9seTnTJa4KVi6dtfH-6XVC4xivx676aaLKGJl8RQGfiu002ocQfUFdRp-U0OjA/exec", {
+  fetch("URL_WEB_APP_KAMU", {
     method: "POST",
     body: JSON.stringify(data)
   })
   .then(res => res.text())
   .then(res => {
-    alert("Data berhasil dikirim!");
+    alert("✅ Data berhasil dikirim!");
     window.location.href = "index.html";
   })
-  .catch(err => alert("Gagal kirim data"));
+  .catch(err => {
+    alert("❌ Gagal kirim data");
+  });
 }
 </script>
 
