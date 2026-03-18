@@ -13,7 +13,6 @@ body {
   font-family: 'Poppins', sans-serif;
   background: linear-gradient(135deg, #0f2a44, #1e5fa8);
   color: white;
-  overflow-x: hidden;
 }
 
 /* HEADER */
@@ -27,32 +26,49 @@ body {
 }
 
 .logo-left, .logo-right {
-  width: 110px;
+  width: 100px;
 }
 
 /* CONTAINER */
 .container {
   max-width: 500px;
-  margin: 120px auto 50px;
+  margin: 120px auto;
   background: white;
   color: black;
   padding: 25px;
   border-radius: 15px;
 }
 
-/* TITLE */
-h2 {
-  text-align: center;
-}
-
 /* INPUT */
-input, textarea, select {
+input, textarea {
   width: 100%;
   padding: 12px;
   margin-top: 10px;
   margin-bottom: 15px;
   border-radius: 8px;
   border: 1px solid #ccc;
+}
+
+/* PAKET CARD */
+.paket {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.card {
+  background: #f1f1f1;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.card.active {
+  border: 2px solid #1e5fa8;
+  background: #e3f0ff;
 }
 
 /* BUTTON */
@@ -67,36 +83,18 @@ button {
   cursor: pointer;
 }
 
-button:hover {
-  background: #0f2a44;
-}
-
-/* PAKET LIST */
-.paket-list {
-  background: #f1f1f1;
-  padding: 15px;
-  border-radius: 10px;
-  font-size: 14px;
-  margin-bottom: 15px;
-}
-
 /* CHARACTER */
 .character {
   position: fixed;
   right: 10px;
   bottom: 0;
-  width: 260px;
-  z-index: 10;
+  width: 200px;
 }
 
 /* MOBILE */
 @media (max-width: 768px) {
   .character {
-    width: 140px;
-  }
-
-  .logo-left, .logo-right {
-    width: 80px;
+    width: 120px;
   }
 }
 </style>
@@ -104,13 +102,11 @@ button:hover {
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <img src="L_LDP.png" class="logo-left">
   <img src="L_ERS.png" class="logo-right">
 </div>
 
-<!-- FORM -->
 <div class="container">
   <h2>Form Pasang Baru</h2>
 
@@ -119,37 +115,66 @@ button:hover {
   <textarea id="alamat" placeholder="Alamat Lengkap"></textarea>
 
   <!-- PILIH PAKET -->
-  <select id="paket">
-    <option value="">Pilih Paket</option>
-    <option>15 Mbps - 125rb</option>
-    <option>20 Mbps - 150rb</option>
-    <option>35 Mbps - 175rb</option>
-    <option>55 Mbps - 230rb</option>
-  </select>
-
-  <!-- DAFTAR PAKET -->
-  <div class="paket-list">
-    <b>Daftar Paket:</b><br>
-    • 15 Mbps - Rp125.000<br>
-    • 20 Mbps - Rp150.000<br>
-    • 35 Mbps - Rp175.000<br>
-    • 55 Mbps - Rp230.000
+  <b>Pilih Paket:</b>
+  <div class="paket">
+    <div class="card" onclick="pilihPaket(this)">15 Mbps<br>125rb</div>
+    <div class="card" onclick="pilihPaket(this)">20 Mbps<br>150rb</div>
+    <div class="card" onclick="pilihPaket(this)">35 Mbps<br>175rb</div>
+    <div class="card" onclick="pilihPaket(this)">55 Mbps<br>230rb</div>
   </div>
+
+  <!-- LOKASI -->
+  <button onclick="ambilLokasi()">📍 Ambil Lokasi</button>
+  <p id="lokasiText"></p>
+
+  <!-- FOTO -->
+  <input type="file" id="foto">
 
   <button onclick="kirimData()">Kirim</button>
 </div>
 
-<!-- KARAKTER -->
 <img src="cs.png" class="character">
 
 <script>
-function kirimData() {
+let paketDipilih = "";
+let lokasi = "";
+let fotoBase64 = "";
+
+/* PILIH PAKET */
+function pilihPaket(el){
+  document.querySelectorAll(".card").forEach(c => c.classList.remove("active"));
+  el.classList.add("active");
+  paketDipilih = el.innerText;
+}
+
+/* AMBIL LOKASI */
+function ambilLokasi(){
+  navigator.geolocation.getCurrentPosition(function(pos){
+    lokasi = pos.coords.latitude + "," + pos.coords.longitude;
+    document.getElementById("lokasiText").innerText = "Lokasi: " + lokasi;
+  });
+}
+
+/* KONVERSI FOTO */
+document.getElementById("foto").addEventListener("change", function(){
+  let file = this.files[0];
+  let reader = new FileReader();
+  reader.onloadend = function(){
+    fotoBase64 = reader.result;
+  }
+  reader.readAsDataURL(file);
+});
+
+/* KIRIM DATA */
+function kirimData(){
 
   var data = {
     nama: document.getElementById("nama").value,
     nohp: document.getElementById("nohp").value,
     alamat: document.getElementById("alamat").value,
-    paket: document.getElementById("paket").value
+    paket: paketDipilih,
+    lokasi: lokasi,
+    foto: fotoBase64
   };
 
   fetch("URL_WEB_APP_KAMU", {
@@ -161,9 +186,7 @@ function kirimData() {
     alert("✅ Data berhasil dikirim!");
     window.location.href = "index.html";
   })
-  .catch(err => {
-    alert("❌ Gagal kirim data");
-  });
+  .catch(err => alert("❌ Gagal kirim"));
 }
 </script>
 
