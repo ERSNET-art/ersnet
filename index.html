@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ERSnet - Customer Service</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #0f2a44, #1e5fa8);
+  color: white;
+}
+
+/* CONTAINER */
+.container {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+/* HEADER */
+h1 {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  background: #f7c948;
+  color: black;
+  display: inline-block;
+  padding: 10px 20px;
+  font-weight: 600;
+  border-radius: 5px;
+  margin-bottom: 40px;
+}
+
+/* DESCRIPTION */
+.desc {
+  font-size: 28px;
+  margin-bottom: 40px;
+}
+
+/* BUTTON */
+.menu {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.menu button {
+  background: #f7c948;
+  border: none;
+  padding: 15px 25px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.menu button:hover {
+  background: #ffd86b;
+  transform: scale(1.05);
+}
+
+/* CHARACTER */
+.character {
+  position: absolute;
+  right: 20px;
+  bottom: 0;
+  width: 300px;
+}
+
+/* LOGO */
+.logo {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 120px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  h1 { font-size: 32px; }
+  .desc { font-size: 20px; }
+  .character { display: none; }
+}
+</style>
+</head>
+
+<body>
+
+<img src="logo_ers.png" class="logo">
+
+<div class="container">
+  <h1>Selamat Datang di ERSnet</h1>
+
+  <div class="subtitle">
+    Solusi WiFi Cerdas untuk Rumah dan Bisnis Anda.
+  </div>
+
+  <div class="desc">
+    Ingin lebih dekat dengan kita? yuk pilih menu sesuai kebutuhanmu
+  </div>
+
+  <div class="menu">
+    <button onclick="goTo('pasang.html')">Pasang Baru</button>
+    <button onclick="goTo('cek.html')">Cek Jaringan</button>
+    <button onclick="goTo('gangguan.html')">Lapor Gangguan</button>
+    <button onclick="goTo('chat.html')">Chat CS</button>
+  </div>
+</div>
+
+<!-- KARAKTER -->
+<img src="cs.png" class="character">
+
+<script>
+function goTo(page){
+  window.location.href = page;
+}
+</script>
+
+</body>
+</html>
