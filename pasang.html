@@ -75,7 +75,7 @@ function kirimData() {
     alamat: document.getElementById("alamat").value
   };
 
-  fetch("URL_WEB_APP_KAMU", {
+  fetch("https://script.google.com/macros/s/AKfycbyH-qNN9seTnTJa4KVi6dtfH-6XVC4xivx676aaLKGJl8RQGfiu002ocQfUFdRp-U0OjA/exec", {
     method: "POST",
     body: JSON.stringify(data)
   })
