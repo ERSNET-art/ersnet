@@ -133,7 +133,7 @@ function kirim(){
   })
   .then(r=>r.json())
   .then(res=>{
-    alert("Tiket berhasil dibuat!\nID: "+res.tiket_id);
+    alert("Tiket berhasil dibuat!\nTicket ID: "+res.tiket_id);
     location.href="index.html";
   })
   .finally(()=>{
