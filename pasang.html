@@ -49,7 +49,7 @@ input, textarea {
   border: 1px solid #ccc;
 }
 
-/* PAKET CARD */
+/* PAKET */
 .paket {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -83,6 +83,23 @@ button {
   cursor: pointer;
 }
 
+/* LOADING */
+.loader {
+  border: 3px solid #fff;
+  border-top: 3px solid #ffd86b;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+
 /* CHARACTER */
 .character {
   position: fixed;
@@ -114,7 +131,6 @@ button {
   <input type="text" id="nohp" placeholder="Nomor WhatsApp">
   <textarea id="alamat" placeholder="Alamat Lengkap"></textarea>
 
-  <!-- PILIH PAKET -->
   <b>Pilih Paket:</b>
   <div class="paket">
     <div class="card" onclick="pilihPaket(this)">15 Mbps<br>125rb</div>
@@ -123,14 +139,12 @@ button {
     <div class="card" onclick="pilihPaket(this)">55 Mbps<br>230rb</div>
   </div>
 
-  <!-- LOKASI -->
   <button onclick="ambilLokasi()">📍 Ambil Lokasi</button>
   <p id="lokasiText"></p>
 
-  <!-- FOTO -->
   <input type="file" id="foto">
 
-  <button onclick="kirimData()">Kirim</button>
+  <button id="btnKirim" onclick="kirimData()">Kirim</button>
 </div>
 
 <img src="cs.png" class="character">
@@ -147,17 +161,21 @@ function pilihPaket(el){
   paketDipilih = el.innerText;
 }
 
-/* AMBIL LOKASI */
+/* LOKASI */
 function ambilLokasi(){
   navigator.geolocation.getCurrentPosition(function(pos){
     lokasi = pos.coords.latitude + "," + pos.coords.longitude;
     document.getElementById("lokasiText").innerText = "Lokasi: " + lokasi;
+  }, function(){
+    alert("❌ Gagal ambil lokasi");
   });
 }
 
-/* KONVERSI FOTO */
+/* FOTO */
 document.getElementById("foto").addEventListener("change", function(){
   let file = this.files[0];
+  if(!file) return;
+
   let reader = new FileReader();
   reader.onloadend = function(){
     fotoBase64 = reader.result;
@@ -168,10 +186,25 @@ document.getElementById("foto").addEventListener("change", function(){
 /* KIRIM DATA */
 function kirimData(){
 
+  var btn = document.getElementById("btnKirim");
+
+  var nama = document.getElementById("nama").value;
+  var nohp = document.getElementById("nohp").value;
+  var alamat = document.getElementById("alamat").value;
+
+  if(!nama || !nohp || !alamat || !paketDipilih){
+    alert("❌ Lengkapi semua data dulu!");
+    return;
+  }
+
+  // LOADING
+  btn.innerHTML = '<span class="loader"></span> Mengirim...';
+  btn.disabled = true;
+
   var data = {
-    nama: document.getElementById("nama").value,
-    nohp: document.getElementById("nohp").value,
-    alamat: document.getElementById("alamat").value,
+    nama: nama,
+    nohp: nohp,
+    alamat: alamat,
     paket: paketDipilih,
     lokasi: lokasi,
     foto: fotoBase64
@@ -183,14 +216,28 @@ function kirimData(){
   })
   .then(res => res.json())
   .then(res => {
-  alert(
-  "Terimakasih telah mempercayai ErsNet sebagai Layanan Internet pilihan anda,\n\n" +
-  "Order ID anda adalah: " + res.order_id + "\n\n" +
-  "Silahkan cek pada menu Track Order Baru atau hubungi CS."
-);
-  window.location.href = "index.html";
-})
-  .catch(err => alert("❌ Gagal kirim"));
+
+    if(res.status === "success"){
+      alert(
+        "Terimakasih telah mempercayai ErsNet sebagai Layanan Internet pilihan anda,\n\n" +
+        "Order ID anda adalah: " + res.order_id + "\n\n" +
+        "Silahkan cek pada menu Track Order Baru atau hubungi CS."
+      );
+
+      window.location.href = "index.html";
+    } else {
+      alert("❌ Error: " + res.message);
+    }
+
+  })
+  .catch(err => {
+    alert("❌ Gagal kirim data");
+    console.error(err);
+  })
+  .finally(() => {
+    btn.innerHTML = "Kirim";
+    btn.disabled = false;
+  });
 }
 </script>
 
