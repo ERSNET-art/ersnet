@@ -186,12 +186,12 @@ function cekOrder(){
         <b>Status:</b> ${res.status_order}
       `;
     } else {
-      hasil.innerHTML = "❌ Order tidak ditemukan";
+      hasil.innerHTML = "Order tidak ditemukan. Silahkan cek kembali Order ID anda.";
     }
 
   })
   .catch(() => {
-    hasil.innerHTML = "❌ Gagal mengambil data";
+    hasil.innerHTML = "Gagal mengambil data. Server sedang sibuk harap ulangi beberapa saat lagi.";
   })
   .finally(() => {
     // LOADING OFF
