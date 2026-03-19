@@ -125,7 +125,7 @@ button {
 </div>
 
 <div class="container">
-  <h2>Form Pasang Baru</h2>
+  <h2 style="text-align:center;">Untuk dapat berlangganan ErsNet Silahkan isi data-data dibawah ini ya,</h2>
 
   <input type="text" id="nama" placeholder="Nama Lengkap">
   <input type="text" id="nohp" placeholder="Nomor WhatsApp">
@@ -142,6 +142,7 @@ button {
   <button onclick="ambilLokasi()">📍 Ambil Lokasi</button>
   <p id="lokasiText"></p>
 
+  <label><b>Masukkan Foto Rumah</b></label>
   <input type="file" id="foto">
 
   <button id="btnKirim" onclick="kirimData()">Kirim</button>
@@ -193,7 +194,7 @@ function kirimData(){
   var alamat = document.getElementById("alamat").value;
 
   if(!nama || !nohp || !alamat || !paketDipilih){
-    alert("❌ Lengkapi semua data dulu!");
+    alert("Data belum Lengkap, silahkan cek kembali data yang anda masukkan!");
     return;
   }
 
