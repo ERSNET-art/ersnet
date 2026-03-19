@@ -3,71 +3,167 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lacak Order Pemasangan Baru- ERSnet</title>
+<title>Lacak Order - ERSnet</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
 body {
+  margin: 0;
   font-family: 'Poppins', sans-serif;
   background: linear-gradient(135deg, #0f2a44, #1e5fa8);
   color: white;
-  text-align: center;
 }
 
+/* HEADER */
+.header {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.logo-left, .logo-right {
+  width: 100px;
+}
+
+/* CONTAINER */
 .container {
   max-width: 500px;
-  margin: 100px auto;
+  margin: 120px auto;
   background: white;
   color: black;
-  padding: 20px;
+  padding: 25px;
   border-radius: 15px;
 }
 
+/* INPUT */
 input {
   width: 100%;
   padding: 12px;
   margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
 }
 
+/* BUTTON */
 button {
   width: 100%;
   padding: 12px;
   background: #1e5fa8;
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 25px;
+  cursor: pointer;
 }
 
+/* RESULT */
 .result {
   margin-top: 20px;
-  text-align: left;
   font-size: 14px;
+  line-height: 1.6;
+  animation: fadeIn 0.5s ease;
+}
+
+/* LOADING */
+.loader {
+  border: 4px solid #eee;
+  border-top: 4px solid #1e5fa8;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  margin: 20px auto;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
+/* CHARACTER */
+.character {
+  position: fixed;
+  right: 10px;
+  bottom: 0;
+  width: 200px;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .character {
+    width: 120px;
+  }
 }
 </style>
 </head>
 
 <body>
 
+<!-- HEADER -->
+<div class="header">
+  <img src="L_LDP.png" class="logo-left">
+  <img src="L_ERS.png" class="logo-right">
+</div>
+
+<!-- CONTENT -->
 <div class="container">
-  <h2>Lacak Order</h2>
+  <h2 style="text-align:center;">Lacak Order Pemasangan Baru</h2>
 
   <input type="text" id="order_id" placeholder="Masukkan Order ID">
-  <button onclick="cekOrder()">Cek</button>
+  <button id="btnCek" onclick="cekOrder()">Cek Order</button>
 
+  <!-- LOADING -->
+  <div id="loading" style="display:none;">
+    <div class="loader"></div>
+    <div class="loading-text">Sedang mencari data...</div>
+  </div>
+
+  <!-- HASIL -->
   <div id="hasil" class="result"></div>
 </div>
 
+<!-- KARAKTER -->
+<img src="cs.png" class="character">
+
 <script>
 function cekOrder(){
+
   var id = document.getElementById("order_id").value;
+  var hasil = document.getElementById("hasil");
+  var loading = document.getElementById("loading");
+  var btn = document.getElementById("btnCek");
+
+  if(!id){
+    alert("Masukkan Order ID dulu!");
+    return;
+  }
+
+  // 🔥 SHOW LOADING
+  hasil.innerHTML = "";
+  loading.style.display = "block";
+  btn.disabled = true;
+  btn.innerText = "Memproses...";
 
   fetch("https://script.google.com/macros/s/AKfycbyH-qNN9seTnTJa4KVi6dtfH-6XVC4xivx676aaLKGJl8RQGfiu002ocQfUFdRp-U0OjA/exec?order_id=" + id)
   .then(res => res.json())
   .then(res => {
 
     if(res.status === "found"){
-      document.getElementById("hasil").innerHTML = `
+
+      hasil.innerHTML = `
         <b>Order ID:</b> ${res.order_id}<br>
         <b>Nama:</b> ${res.nama}<br>
         <b>No HP:</b> ${res.nohp}<br>
@@ -76,10 +172,20 @@ function cekOrder(){
         <b>Lokasi:</b> ${res.lokasi}<br>
         <b>Status:</b> ${res.status_order}
       `;
+
     } else {
-      document.getElementById("hasil").innerHTML = "❌ Order tidak ditemukan";
+      hasil.innerHTML = "Order tidak ditemukan, Silahkan cek Order ID anda kembali.";
     }
 
+  })
+  .catch(() => {
+    hasil.innerHTML = "Gagal mengambil data, Server sedang offline silahkan hubungi CS.";
+  })
+  .finally(() => {
+    // 🔥 HIDE LOADING
+    loading.style.display = "none";
+    btn.disabled = false;
+    btn.innerText = "Cek Order";
   });
 }
 </script>
