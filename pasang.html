@@ -15,7 +15,6 @@ body {
   color: white;
 }
 
-/* HEADER */
 .header {
   position: absolute;
   top: 20px;
@@ -29,7 +28,6 @@ body {
   width: 100px;
 }
 
-/* CONTAINER */
 .container {
   max-width: 500px;
   margin: 120px auto;
@@ -39,7 +37,6 @@ body {
   border-radius: 15px;
 }
 
-/* INPUT */
 input, textarea {
   width: 100%;
   padding: 12px;
@@ -49,12 +46,10 @@ input, textarea {
   border: 1px solid #ccc;
 }
 
-/* PAKET */
 .paket {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-bottom: 15px;
 }
 
 .card {
@@ -63,7 +58,6 @@ input, textarea {
   border-radius: 10px;
   text-align: center;
   cursor: pointer;
-  border: 2px solid transparent;
 }
 
 .card.active {
@@ -71,48 +65,43 @@ input, textarea {
   background: #e3f0ff;
 }
 
-/* BUTTON */
 button {
   width: 100%;
-  padding: 15px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
   background: #1e5fa8;
   color: white;
-  border: none;
-  border-radius: 25px;
-  font-weight: bold;
+  margin-top: 5px;
   cursor: pointer;
 }
 
-/* LOADING */
+#map {
+  height: 300px;
+  border-radius: 10px;
+  margin-top: 10px;
+  display: none;
+}
+
 .loader {
   border: 3px solid #fff;
-  border-top: 3px solid #ffd86b;
+  border-top: 3px solid yellow;
   border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  animation: spin 1s linear infinite;
+  width: 14px;
+  height: 14px;
   display: inline-block;
-  margin-right: 8px;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg);}
-  100% { transform: rotate(360deg);}
+  100% { transform: rotate(360deg); }
 }
 
-/* CHARACTER */
 .character {
   position: fixed;
   right: 10px;
   bottom: 0;
-  width: 200px;
-}
-
-/* MOBILE */
-@media (max-width: 768px) {
-  .character {
-    width: 120px;
-  }
+  width: 150px;
 }
 </style>
 </head>
@@ -125,119 +114,134 @@ button {
 </div>
 
 <div class="container">
-  <h2 style="text-align:center;">Untuk dapat berlangganan ErsNet Silahkan isi data-data dibawah ini ya,</h2>
+<h2 style="text-align:center;">Untuk dapat berlangganan ErsNet Silahkan isi beberapa data dibawah ini ya</h2>
 
-  <input type="text" id="nama" placeholder="Nama Lengkap">
-  <input type="text" id="nohp" placeholder="Nomor WhatsApp">
-  <textarea id="alamat" placeholder="Alamat Lengkap"></textarea>
+<input type="text" id="nama" placeholder="Nama Lengkap">
+<input type="text" id="nohp" placeholder="Nomor WhatsApp">
+<textarea id="alamat" placeholder="Alamat Lengkap"></textarea>
 
-  <b>Pilih Paket:</b>
-  <div class="paket">
-    <div class="card" onclick="pilihPaket(this)">15 Mbps<br>125rb</div>
-    <div class="card" onclick="pilihPaket(this)">20 Mbps<br>150rb</div>
-    <div class="card" onclick="pilihPaket(this)">35 Mbps<br>175rb</div>
-    <div class="card" onclick="pilihPaket(this)">55 Mbps<br>230rb</div>
-  </div>
+<b>Pilih Paket:</b>
+<div class="paket">
+  <div class="card" onclick="pilihPaket(this)">15 Mbps<br>125rb</div>
+  <div class="card" onclick="pilihPaket(this)">20 Mbps<br>150rb</div>
+  <div class="card" onclick="pilihPaket(this)">35 Mbps<br>175rb</div>
+  <div class="card" onclick="pilihPaket(this)">55 Mbps<br>230rb</div>
+</div>
 
-  <button onclick="ambilLokasi()">📍 Ambil Lokasi</button>
-  <p id="lokasiText"></p>
+<br>
+<b>Pilih Lokasi:</b>
+<button onclick="modeLokasi('gps')">📍 Lokasi Saat Ini</button>
+<button onclick="modeLokasi('map')">🗺 Pilih di Peta</button>
 
-  <label><b>Masukkan Foto Rumah</b></label>
-  <input type="file" id="foto">
+<p id="lokasiText"></p>
+<div id="map"></div>
 
-  <button id="btnKirim" onclick="kirimData()">Kirim</button>
+<label><b>Masukkan Foto Rumah</b></label>
+<input type="file" id="foto">
+
+<button id="btnKirim" onclick="kirimData()">Kirim</button>
 </div>
 
 <img src="cs.png" class="character">
 
+<!-- 🔥 API KEY SUDAH DIPASANG -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdDFUbkc6peaordAoRzWw27JvIHpdcZ4w"></script>
+
 <script>
-let paketDipilih = "";
-let lokasi = "";
-let fotoBase64 = "";
+let paketDipilih="", lokasi="", fotoBase64="";
+let mapObj, marker;
 
 /* PILIH PAKET */
 function pilihPaket(el){
-  document.querySelectorAll(".card").forEach(c => c.classList.remove("active"));
+  document.querySelectorAll(".card").forEach(c=>c.classList.remove("active"));
   el.classList.add("active");
   paketDipilih = el.innerText;
 }
 
-/* LOKASI */
-function ambilLokasi(){
-  navigator.geolocation.getCurrentPosition(function(pos){
-    lokasi = pos.coords.latitude + "," + pos.coords.longitude;
-    document.getElementById("lokasiText").innerText = "Lokasi: " + lokasi;
-  }, function(){
-    alert("❌ Gagal ambil lokasi");
+/* MODE LOKASI */
+function modeLokasi(mode){
+
+  if(mode==="gps"){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      lokasi = pos.coords.latitude+","+pos.coords.longitude;
+      lokasiText.innerText = "Lokasi: "+lokasi;
+    }, ()=>{
+      alert("Gagal ambil lokasi");
+    });
+    document.getElementById("map").style.display="none";
+  }
+
+  if(mode==="map"){
+    document.getElementById("map").style.display="block";
+    initMap();
+  }
+}
+
+/* MAP */
+function initMap(){
+  if(mapObj) return;
+
+  mapObj = new google.maps.Map(document.getElementById("map"), {
+    center:{lat:-2.5,lng:140.7},
+    zoom:13
+  });
+
+  mapObj.addListener("click", function(e){
+    if(marker) marker.setMap(null);
+
+    marker = new google.maps.Marker({
+      position:e.latLng,
+      map:mapObj
+    });
+
+    lokasi = e.latLng.lat()+","+e.latLng.lng();
+    lokasiText.innerText = "Lokasi dipilih: "+lokasi;
   });
 }
 
 /* FOTO */
-document.getElementById("foto").addEventListener("change", function(){
-  let file = this.files[0];
-  if(!file) return;
-
+foto.onchange = function(){
   let reader = new FileReader();
-  reader.onloadend = function(){
-    fotoBase64 = reader.result;
-  }
-  reader.readAsDataURL(file);
-});
+  reader.onloadend = ()=> fotoBase64 = reader.result;
+  reader.readAsDataURL(this.files[0]);
+};
 
 /* KIRIM DATA */
 function kirimData(){
+  let btn = document.getElementById("btnKirim");
 
-  var btn = document.getElementById("btnKirim");
-
-  var nama = document.getElementById("nama").value;
-  var nohp = document.getElementById("nohp").value;
-  var alamat = document.getElementById("alamat").value;
-
-  if(!nama || !nohp || !alamat || !paketDipilih){
-    alert("Data belum Lengkap, silahkan cek kembali data yang anda masukkan!");
+  if(!nama.value || !nohp.value || !alamat.value || !paketDipilih){
+    alert("Lengkapi data!");
     return;
   }
 
-  // LOADING
   btn.innerHTML = '<span class="loader"></span> Mengirim...';
   btn.disabled = true;
 
-  var data = {
-    nama: nama,
-    nohp: nohp,
-    alamat: alamat,
-    paket: paketDipilih,
-    lokasi: lokasi,
-    foto: fotoBase64
-  };
-
   fetch("https://script.google.com/macros/s/AKfycbyH-qNN9seTnTJa4KVi6dtfH-6XVC4xivx676aaLKGJl8RQGfiu002ocQfUFdRp-U0OjA/exec", {
-    method: "POST",
-    body: JSON.stringify(data)
+    method:"POST",
+    body: JSON.stringify({
+      nama:nama.value,
+      nohp:nohp.value,
+      alamat:alamat.value,
+      paket:paketDipilih,
+      lokasi:lokasi,
+      foto:fotoBase64
+    })
   })
-  .then(res => res.json())
-  .then(res => {
-
-    if(res.status === "success"){
-      alert(
-        "Terimakasih telah mempercayai ErsNet sebagai Layanan Internet pilihan anda,\n\n" +
-        "Order ID anda adalah: " + res.order_id + "\n\n" +
-        "Silahkan cek pada menu Track Order Baru atau hubungi CS."
-      );
-
-      window.location.href = "index.html";
-    } else {
-      alert("❌ Error: " + res.message);
-    }
-
+  .then(r=>r.json())
+  .then(res=>{
+    alert(
+      "Terimakasih telah mempercayai ErsNet sebagai Layanan Internet pilihan anda,\n\n" +
+      "Order ID anda adalah: " + res.order_id + "\n\n" +
+      "Silahkan cek pada menu Track Order Baru atau hubungi CS."
+    );
+    location.href="index.html";
   })
-  .catch(err => {
-    alert("❌ Gagal kirim data");
-    console.error(err);
-  })
-  .finally(() => {
-    btn.innerHTML = "Kirim";
-    btn.disabled = false;
+  .catch(()=> alert("Gagal kirim"))
+  .finally(()=>{
+    btn.innerHTML="Kirim";
+    btn.disabled=false;
   });
 }
 </script>
