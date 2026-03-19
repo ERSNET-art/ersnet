@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lacak Order - ERSnet</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #0f2a44, #1e5fa8);
+  color: white;
+  text-align: center;
+}
+
+.container {
+  max-width: 500px;
+  margin: 100px auto;
+  background: white;
+  color: black;
+  padding: 20px;
+  border-radius: 15px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: #1e5fa8;
+  color: white;
+  border: none;
+  border-radius: 10px;
+}
+
+.result {
+  margin-top: 20px;
+  text-align: left;
+  font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Lacak Order</h2>
+
+  <input type="text" id="order_id" placeholder="Masukkan Order ID">
+  <button onclick="cekOrder()">Cek</button>
+
+  <div id="hasil" class="result"></div>
+</div>
+
+<script>
+function cekOrder(){
+  var id = document.getElementById("order_id").value;
+
+  fetch("https://script.google.com/macros/s/AKfycbyH-qNN9seTnTJa4KVi6dtfH-6XVC4xivx676aaLKGJl8RQGfiu002ocQfUFdRp-U0OjA/exec?order_id=" + id)
+  .then(res => res.json())
+  .then(res => {
+
+    if(res.status === "found"){
+      document.getElementById("hasil").innerHTML = `
+        <b>Order ID:</b> ${res.order_id}<br>
+        <b>Nama:</b> ${res.nama}<br>
+        <b>No HP:</b> ${res.nohp}<br>
+        <b>Alamat:</b> ${res.alamat}<br>
+        <b>Paket:</b> ${res.paket}<br>
+        <b>Lokasi:</b> ${res.lokasi}<br>
+        <b>Status:</b> ${res.status_order}
+      `;
+    } else {
+      document.getElementById("hasil").innerHTML = "❌ Order tidak ditemukan";
+    }
+
+  });
+}
+</script>
+
+</body>
+</html>
