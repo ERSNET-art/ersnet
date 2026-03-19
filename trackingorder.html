@@ -177,13 +177,13 @@ function cekOrder(){
 
     if(res.status === "found"){
       hasil.innerHTML = `
-        <b>Order ID:</b> ${res.order_id}<br>
-        <b>Nama:</b> ${res.nama}<br>
-        <b>No HP:</b> ${res.nohp}<br>
-        <b>Alamat:</b> ${res.alamat}<br>
-        <b>Paket:</b> ${res.paket}<br>
-        <b>Lokasi:</b> ${res.lokasi}<br>
-        <b>Status:</b> ${res.status_order}
+        <b>Order ID :</b> ${res.order_id}<br>
+        <b>Nama :</b> ${res.nama}<br>
+        <b>No HP :</b> ${res.nohp}<br>
+        <b>Alamat :</b> ${res.alamat}<br>
+        <b>Paket :</b> ${res.paket}<br>
+        <b>Lokasi :</b> ${res.lokasi}<br>
+        <b>Status Order :</b> ${res.status_order}
       `;
     } else {
       hasil.innerHTML = "Order tidak ditemukan. Silahkan cek kembali Order ID anda.";
