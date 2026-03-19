@@ -181,11 +181,11 @@ function kirimData(){
     method: "POST",
     body: JSON.stringify(data)
   })
-  .then(res => res.text())
+  .then(res => res.json())
   .then(res => {
-    alert("✅ Data berhasil dikirim!");
-    window.location.href = "index.html";
-  })
+  alert("✅ Order berhasil!\nID: " + res.order_id);
+  window.location.href = "index.html";
+})
   .catch(err => alert("❌ Gagal kirim"));
 }
 </script>
