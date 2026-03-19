@@ -37,20 +37,31 @@ body {
   color: black;
   padding: 25px;
   border-radius: 15px;
+  text-align: center;
+}
+
+/* FORM CENTER */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* INPUT */
 input {
   width: 100%;
+  max-width: 350px;
   padding: 12px;
   margin-bottom: 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
+  text-align: center;
 }
 
 /* BUTTON */
 button {
   width: 100%;
+  max-width: 350px;
   padding: 12px;
   background: #1e5fa8;
   color: white;
@@ -64,6 +75,7 @@ button {
   margin-top: 20px;
   font-size: 14px;
   line-height: 1.6;
+  text-align: left;
   animation: fadeIn 0.5s ease;
 }
 
@@ -120,10 +132,12 @@ button {
 
 <!-- CONTENT -->
 <div class="container">
-  <h2 style="text-align:center;">Lacak Order Pemasangan Baru</h2>
+  <h2>Lacak Order Pemasangan Baru</h2>
 
-  <input type="text" id="order_id" placeholder="Masukkan Order ID">
-  <button id="btnCek" onclick="cekOrder()">Cek Order</button>
+  <div class="form-group">
+    <input type="text" id="order_id" placeholder="Masukkan Order ID">
+    <button id="btnCek" onclick="cekOrder()">Cek Order</button>
+  </div>
 
   <!-- LOADING -->
   <div id="loading" style="display:none;">
@@ -151,7 +165,7 @@ function cekOrder(){
     return;
   }
 
-  // 🔥 SHOW LOADING
+  // LOADING ON
   hasil.innerHTML = "";
   loading.style.display = "block";
   btn.disabled = true;
@@ -162,7 +176,6 @@ function cekOrder(){
   .then(res => {
 
     if(res.status === "found"){
-
       hasil.innerHTML = `
         <b>Order ID:</b> ${res.order_id}<br>
         <b>Nama:</b> ${res.nama}<br>
@@ -172,17 +185,16 @@ function cekOrder(){
         <b>Lokasi:</b> ${res.lokasi}<br>
         <b>Status:</b> ${res.status_order}
       `;
-
     } else {
-      hasil.innerHTML = "Order tidak ditemukan, Silahkan cek Order ID anda kembali.";
+      hasil.innerHTML = "❌ Order tidak ditemukan";
     }
 
   })
   .catch(() => {
-    hasil.innerHTML = "Gagal mengambil data, Server sedang offline silahkan hubungi CS.";
+    hasil.innerHTML = "❌ Gagal mengambil data";
   })
   .finally(() => {
-    // 🔥 HIDE LOADING
+    // LOADING OFF
     loading.style.display = "none";
     btn.disabled = false;
     btn.innerText = "Cek Order";
