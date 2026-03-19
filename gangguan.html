@@ -133,7 +133,7 @@ function kirim(){
   })
   .then(r=>r.json())
   .then(res=>{
-    alert("Tiket berhasil dibuat. Silahkan cek secara berkala pada menu Lacak Tiket Gangguan atau Hubungi CS!.\nTicket ID: "+res.tiket_id);
+    alert("Tiket berhasil dibuat, keluhan anda akan segera kami tindaklanjuti./n/n Silahkan cek secara berkala pada menu Lacak Tiket Gangguan atau Hubungi CS!.\nTicket ID: "+res.tiket_id);
     location.href="index.html";
   })
   .finally(()=>{
