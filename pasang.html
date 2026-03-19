@@ -183,7 +183,11 @@ function kirimData(){
   })
   .then(res => res.json())
   .then(res => {
-  alert("✅ Order berhasil!\nID: " + res.order_id);
+  alert(
+  "Terimakasih telah mempercayai ErsNet sebagai Layanan Internet pilihan anda,\n\n" +
+  "Order ID anda adalah: " + res.order_id + "\n\n" +
+  "Silahkan cek pada menu Track Order Baru atau hubungi CS."
+);
   window.location.href = "index.html";
 })
   .catch(err => alert("❌ Gagal kirim"));
