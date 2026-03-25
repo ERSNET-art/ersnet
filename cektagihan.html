@@ -15,18 +15,16 @@ body {
   color: white;
 }
 
-/* HEADER LOGO */
 .header {
   position: absolute;
   top: 20px;
   right: 20px;
 }
 
-.logo {
+.logo-right {
   width: 100px;
 }
 
-/* CARD */
 .container {
   max-width: 500px;
   margin: 120px auto;
@@ -41,9 +39,8 @@ input, button {
   width: 100%;
   max-width: 350px;
   padding: 12px;
-  margin-bottom: 10px;
+  margin: 10px 0;
   border-radius: 8px;
-  border: 1px solid #ccc;
 }
 
 button {
@@ -60,27 +57,16 @@ button {
   font-size: 14px;
 }
 
-.loader {
-  border: 4px solid #eee;
-  border-top: 4px solid #1e5fa8;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  margin: 20px auto;
-  animation: spin 1s linear infinite;
+.qr {
+  margin-top: 15px;
+  text-align: center;
 }
 
-img.qr {
-  margin-top: 10px;
-  border-radius: 10px;
-}
-
-/* CHARACTER */
 .character {
   position: fixed;
   right: 10px;
   bottom: 0;
-  width: 180px;
+  width: 200px;
 }
 
 @media (max-width: 768px) {
@@ -88,156 +74,132 @@ img.qr {
     width: 120px;
   }
 }
-
-@keyframes spin {
-  100% { transform: rotate(360deg); }
-}
 </style>
 </head>
 
 <body>
 
-<!-- 🔥 LOGO -->
 <div class="header">
-  <img src="https://raw.githubusercontent.com/ERSNET-art/ersnet/main/L_ERS.png" class="logo">
+  <img src="https://raw.githubusercontent.com/USERNAME/REPO/main/L_ERS.png" class="logo-right">
 </div>
 
-<!-- 🔥 CONTENT -->
 <div class="container">
   <h2>Cek Tagihan</h2>
-  <p>Masukkan No Layanan / No HP</p>
 
-  <input type="text" id="input" placeholder="Contoh: 12345 / 0812xxx">
-  <button id="btn" onclick="cekTagihan()">Cek Tagihan</button>
-
-  <div id="loading" style="display:none;">
-    <div class="loader"></div>
-    <div>Sedang memproses...</div>
-  </div>
+  <input type="text" id="no_layanan" placeholder="Masukkan No Layanan / No HP">
+  <button onclick="cekTagihan()">Cek Tagihan</button>
 
   <div id="hasil" class="result"></div>
 </div>
 
-<!-- 🔥 CHARACTER CS -->
-<img src="https://raw.githubusercontent.com/ERSNET-art/ersnet/main/cs.png" class="character">
+<img src="https://raw.githubusercontent.com/USERNAME/REPO/main/cs.png" class="character">
 
 <script>
-// FORMAT NOMOR
-function formatInput(val){
-  val = val.replace(/\D/g, "");
 
-  if(val.startsWith("08")){
-    return "62" + val.substring(1);
-  }
-
-  return val;
-}
-
-// CEK TAGIHAN
 function cekTagihan(){
 
-  var input = document.getElementById("input").value.trim();
+  var id = document.getElementById("no_layanan").value;
   var hasil = document.getElementById("hasil");
-  var loading = document.getElementById("loading");
-  var btn = document.getElementById("btn");
 
-  if(!input){
-    alert("Masukkan data terlebih dahulu!");
+  if(!id){
+    alert("Masukkan data dulu!");
     return;
   }
 
-  var kirim = formatInput(input);
+  hasil.innerHTML = "Loading...";
 
-  hasil.innerHTML = "";
-  loading.style.display = "block";
-  btn.disabled = true;
-  btn.innerText = "Memproses...";
-
-  fetch("https://script.google.com/macros/s/AKfycbwgVRi6-qmCeH9Q49uURfY_n4Od_iMN8n0vuaU8SS37n4UjvpEpIFY3u5RLJcEizevo/exec?tiket_id=" + kirim)
+  fetch("https://script.google.com/macros/s/AKfycbwgVRi6-qmCeH9Q49uURfY_n4Od_iMN8n0vuaU8SS37n4UjvpEpIFY3u5RLJcEizevo/exec?tiket_id=" + id)
   .then(res => res.json())
   .then(res => {
 
     if(res.status === "found" && res.type === "tagihan"){
 
+      // simpan ke hidden
+      window.no_layanan = res.no_layanan;
+      window.nama = res.nama;
+
+      hasil.innerHTML = `
+        <b>No Layanan :</b> ${res.no_layanan}<br>
+        <b>Nama :</b> ${res.nama}<br>
+        <b>Tagihan :</b> Rp ${res.tagihan}<br>
+        <b>Status :</b> ${res.status_bayar}
+      `;
+
+      // BELUM BAYAR
       if(res.status_bayar === "BELUM BAYAR"){
-        hasil.innerHTML = `
-          <b>No Layanan:</b> ${res.no_layanan}<br>
-          <b>Nama:</b> ${res.nama}<br>
-          <b>Tagihan:</b> Rp ${res.tagihan}<br>
-          <b>Status:</b> ❌ BELUM BAYAR<br><br>
 
-          <center>
-            <b>Scan QR untuk pembayaran</b><br>
-            <img src="https://raw.githubusercontent.com/ERSNET-art/ersnet/main/QRers.jpeg" width="200">
-          </center>
+        hasil.innerHTML += `
+          <div class="qr">
+            <img src="https://raw.githubusercontent.com/USERNAME/REPO/main/qr.png" width="200"><br><br>
 
-          <hr>
+            <b>Jika sudah melakukan pembayaran silahkan upload bukti bayar</b><br><br>
 
-          <b>Jika sudah melakukan pembayaran, upload bukti:</b><br>
-          <input type="file" id="bukti" accept="image/*"><br>
-          <button onclick="uploadBukti('${res.no_layanan}','${res.nama}')">Kirim Bukti</button>
-        `;
-      } else {
-        hasil.innerHTML = `
-          <b>No Layanan:</b> ${res.no_layanan}<br>
-          <b>Nama:</b> ${res.nama}<br>
-          <b>Tagihan:</b> Rp ${res.tagihan}<br>
-          <b>Status:</b> ✅ SUDAH BAYAR
+            <input type="file" id="bukti"><br><br>
+            <button onclick="uploadBukti()">Upload Bukti</button>
+          </div>
         `;
       }
 
+      // SUDAH BAYAR
+      if(res.status_bayar === "SUDAH BAYAR"){
+        hasil.innerHTML += `<br><br><span style="color:green;font-weight:bold;">✅ Pembayaran sudah diterima</span>`;
+      }
+
     } else {
-      hasil.innerHTML = "❌ Tagihan tidak ditemukan";
+      hasil.innerHTML = "❌ Data tidak ditemukan";
     }
 
   })
   .catch(() => {
     hasil.innerHTML = "❌ Gagal mengambil data";
-  })
-  .finally(() => {
-    loading.style.display = "none";
-    btn.disabled = false;
-    btn.innerText = "Cek Tagihan";
   });
 }
 
-// UPLOAD BUKTI
-function uploadBukti(no_layanan, nama){
 
-  var fileInput = document.getElementById("bukti");
-  var file = fileInput.files[0];
+function uploadBukti(){
+
+  var file = document.getElementById("bukti").files[0];
 
   if(!file){
-    alert("Silahkan pilih bukti pembayaran!");
+    alert("Pilih file dulu!");
     return;
   }
 
   var reader = new FileReader();
 
-  reader.onload = function(e){
+  reader.onloadend = function(){
 
-    var base64 = e.target.result;
+    var base64 = reader.result;
 
     fetch("https://script.google.com/macros/s/AKfycbwgVRi6-qmCeH9Q49uURfY_n4Od_iMN8n0vuaU8SS37n4UjvpEpIFY3u5RLJcEizevo/exec", {
       method: "POST",
       body: JSON.stringify({
         type: "bukti",
-        no_layanan: no_layanan,
-        nama: nama,
+        nama: window.nama,
+        no_layanan: window.no_layanan,
         foto: base64
       })
     })
-    .then(() => {
-      alert("✅ Bukti berhasil dikirim!");
+    .then(res => res.json())
+    .then(res => {
+
+      if(res.status === "success"){
+        alert("✅ Bukti berhasil dikirim");
+        location.reload();
+      } else {
+        alert("❌ Upload gagal");
+      }
+
     })
     .catch(() => {
-      alert("❌ Upload gagal");
+      alert("❌ Upload gagal (koneksi)");
     });
 
   };
 
   reader.readAsDataURL(file);
 }
+
 </script>
 
 </body>
