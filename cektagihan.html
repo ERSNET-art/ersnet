@@ -173,9 +173,6 @@ function uploadBukti(){
 
 fetch("https://script.google.com/macros/s/AKfycbwgVRi6-qmCeH9Q49uURfY_n4Od_iMN8n0vuaU8SS37n4UjvpEpIFY3u5RLJcEizevo/exec", {
   method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
   body: JSON.stringify({
     type: "bukti",
     nama: window.nama,
