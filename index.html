@@ -32,15 +32,15 @@ body::before {
 .header {
   position: absolute;
   top: 20px;
-  left: 20px;
-  right: 20px;
+  left: 0;
+  right: 0;
   display: flex;
-  justify-content: space-between;
+  justify-content: center; /* 🔥 bikin ke tengah */
   z-index: 2;
 }
 
-.logo-left, .logo-right {
-  width: 120px;
+.logo-center {
+  width: 180px; /* 🔥 perbesar ukuran */
 }
 
 /* CONTAINER */
@@ -156,8 +156,7 @@ h1 {
 
 <!-- HEADER -->
 <div class="header">
-  <img src="L_LDP.png" class="logo-left">
-  <img src="L_ERS.png" class="logo-right">
+  <img src="L_ERS.png" class="logo-center">
 </div>
 
 <!-- CONTENT -->
