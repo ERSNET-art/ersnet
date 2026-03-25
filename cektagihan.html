@@ -3,123 +3,86 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cek Tagihan - ERSnet</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
-<style>
-body { margin: 0; font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #0f2a44, #1e5fa8); color: white; }
-.header { position: absolute; top: 20px; right: 20px; }
-.logo-right { width: 100px; }
-.container { max-width: 500px; margin: 120px auto; background: white; color: black; padding: 25px; border-radius: 15px; text-align: center; }
-input, button { width: 100%; max-width: 350px; padding: 12px; margin: 10px 0; border-radius: 8px; }
-button { background: #1e5fa8; color: white; border: none; border-radius: 25px; cursor: pointer; }
-.result { margin-top: 20px; text-align: left; font-size: 14px; }
-.qr { margin-top: 15px; text-align: center; }
-.character { position: fixed; right: 10px; bottom: 0; width: 200px; }
-@media (max-width: 768px) { .character { width: 120px; } }
-</style>
+<title>Upload Bukti Tagihan</title>
 </head>
-
 <body>
+<h2>Cek Tagihan & Upload Bukti</h2>
 
-<div class="header">
-  <img src="https://raw.githubusercontent.com/ERSNET-art/ersnet/main/L_ERS.png" class="logo-right">
+<label>No Layanan / HP:</label><br>
+<input type="text" id="noLayanan"><br><br>
+<button onclick="cekTagihan()">Cek Tagihan</button>
+
+<div id="infoTagihan" style="margin-top:20px;"></div>
+
+<div id="uploadDiv" style="display:none; margin-top:20px;">
+  <label>Pilih Bukti Bayar:</label><br>
+  <input type="file" id="bukti"><br><br>
+  <button onclick="uploadBukti()">Upload Bukti</button>
 </div>
-
-<div class="container">
-  <h2>Cek Tagihan</h2>
-  <input type="text" id="no_layanan" placeholder="Masukkan No Layanan / No HP">
-  <button onclick="cekTagihan()">Cek Tagihan</button>
-  <div id="hasil" class="result"></div>
-</div>
-
-<img src="https://raw.githubusercontent.com/ERSNET-art/ersnet/main/cs.png" class="character">
 
 <script>
+var windowData = {};
+
 function cekTagihan(){
-  var id = document.getElementById("no_layanan").value;
-  var hasil = document.getElementById("hasil");
-  if(!id){ alert("Masukkan data dulu!"); return; }
+  var no = document.getElementById("noLayanan").value.trim();
+  if(!no){ alert("Masukkan No Layanan / HP"); return; }
 
-  hasil.innerHTML = "Loading...";
-
-  fetch("https://script.google.com/macros/s/AKfycbwgVRi6-qmCeH9Q49uURfY_n4Od_iMN8n0vuaU8SS37n4UjvpEpIFY3u5RLJcEizevo/exec?tiket_id=" + id)
-    .then(res => res.json())
-    .then(res => {
-      if(res.status === "found" && res.type === "tagihan"){
-        window.no_layanan = res.no_layanan;
-        window.nama = res.nama;
-
-        hasil.innerHTML = `
-          <b>No Layanan :</b> ${res.no_layanan}<br>
-          <b>Nama :</b> ${res.nama}<br>
-          <b>Tagihan :</b> Rp ${res.tagihan}<br>
-          <b>Status :</b> ${res.status_bayar}
-        `;
-
-        if(res.status_bayar === "BELUM BAYAR"){
-          hasil.innerHTML += `
-            <div class="qr">
-              <img src="https://raw.githubusercontent.com/ERSNET-art/ersnet/main/QRers.jpeg" width="200"><br><br>
-              <b>Jika sudah melakukan pembayaran silahkan upload bukti bayar</b><br><br>
-              <input type="file" id="bukti"><br><br>
-              <button onclick="uploadBukti()">Upload Bukti</button>
-            </div>
-          `;
-        }
-
-        if(res.status_bayar === "SUDAH BAYAR"){
-          hasil.innerHTML += `<br><br><span style="color:green;font-weight:bold;">✅ Pembayaran sudah diterima</span>`;
-        }
-
+  fetch("https://script.google.com/macros/s/AKfycbwgVRi6-qmCeH9Q49uURfY_n4Od_iMN8n0vuaU8SS37n4UjvpEpIFY3u5RLJcEizevo/exec?tiket_id=" + encodeURIComponent(no))
+    .then(res=>res.json())
+    .then(res=>{
+      if(res.status==="found"){
+        windowData.no_layanan = res.no_layanan;
+        windowData.nama = res.nama;
+        document.getElementById("infoTagihan").innerHTML = 
+          "Nama: " + res.nama + "<br>" +
+          "No Layanan: " + res.no_layanan + "<br>" +
+          "Tagihan: " + res.tagihan + "<br>" +
+          "Status Bayar: " + res.status_bayar;
+        document.getElementById("uploadDiv").style.display = "block";
       } else {
-        hasil.innerHTML = "❌ Data tidak ditemukan";
+        alert("Tagihan tidak ditemukan!");
+        document.getElementById("uploadDiv").style.display = "none";
       }
     })
-    .catch(() => { hasil.innerHTML = "❌ Gagal mengambil data"; });
+    .catch(err=>{
+      console.error(err);
+      alert("❌ Koneksi gagal");
+    });
 }
 
 function uploadBukti(){
   var file = document.getElementById("bukti").files[0];
-
-  if(!file){
-    alert("Pilih file dulu!");
-    return;
-  }
+  if(!file){ alert("Pilih file dulu!"); return; }
 
   var reader = new FileReader();
-
   reader.onloadend = function(){
     var base64 = reader.result;
 
-    // Kirim base64 ke Apps Script, tapi server tidak kirim ke WA
     fetch("https://script.google.com/macros/s/AKfycbwgVRi6-qmCeH9Q49uURfY_n4Od_iMN8n0vuaU8SS37n4UjvpEpIFY3u5RLJcEizevo/exec", {
       method: "POST",
       body: JSON.stringify({
         type: "bukti",
-        nama: window.nama,
-        no_layanan: window.no_layanan,
+        nama: windowData.nama,
+        no_layanan: windowData.no_layanan,
         foto: base64
       })
     })
-    .then(res => res.json())
-    .then(res => {
-      if(res.status === "success"){
+    .then(res=>res.json())
+    .then(res=>{
+      if(res.status==="success"){
         alert("✅ Bukti berhasil dikirim dan tersimpan di Sheet");
         location.reload();
       } else {
-        alert("❌ Upload gagal");
+        alert("❌ Upload gagal: " + (res.message || "unknown error"));
       }
     })
-    .catch(() => {
+    .catch(err=>{
+      console.error(err);
       alert("❌ Upload gagal (koneksi)");
     });
   };
-
   reader.readAsDataURL(file);
 }
 </script>
-
 </body>
 </html>
