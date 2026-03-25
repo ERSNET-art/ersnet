@@ -91,20 +91,22 @@ function uploadBukti(){
   var reader = new FileReader();
 
   reader.onloadend = function(){
-    // Hanya kirim nama & no_layanan, jangan kirim base64
+    var base64 = reader.result;
+
+    // Kirim base64 ke Apps Script, tapi server tidak kirim ke WA
     fetch("https://script.google.com/macros/s/AKfycbwgVRi6-qmCeH9Q49uURfY_n4Od_iMN8n0vuaU8SS37n4UjvpEpIFY3u5RLJcEizevo/exec", {
       method: "POST",
       body: JSON.stringify({
         type: "bukti",
         nama: window.nama,
         no_layanan: window.no_layanan,
-        // foto: base64  << hapus ini
+        foto: base64
       })
     })
     .then(res => res.json())
     .then(res => {
       if(res.status === "success"){
-        alert("✅ Bukti berhasil dikirim");
+        alert("✅ Bukti berhasil dikirim dan tersimpan di Sheet");
         location.reload();
       } else {
         alert("❌ Upload gagal");
