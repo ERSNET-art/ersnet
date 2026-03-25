@@ -15,6 +15,18 @@ body {
   color: white;
 }
 
+/* HEADER LOGO */
+.header {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.logo {
+  width: 100px;
+}
+
+/* CARD */
 .container {
   max-width: 500px;
   margin: 120px auto;
@@ -63,6 +75,20 @@ img.qr {
   border-radius: 10px;
 }
 
+/* CHARACTER */
+.character {
+  position: fixed;
+  right: 10px;
+  bottom: 0;
+  width: 180px;
+}
+
+@media (max-width: 768px) {
+  .character {
+    width: 120px;
+  }
+}
+
 @keyframes spin {
   100% { transform: rotate(360deg); }
 }
@@ -71,6 +97,12 @@ img.qr {
 
 <body>
 
+<!-- 🔥 LOGO -->
+<div class="header">
+  <img src="https://raw.githubusercontent.com/ERSNET-art/ersnet/main/L_ERS.png" class="logo">
+</div>
+
+<!-- 🔥 CONTENT -->
 <div class="container">
   <h2>Cek Tagihan</h2>
   <p>Masukkan No Layanan / No HP</p>
@@ -86,8 +118,11 @@ img.qr {
   <div id="hasil" class="result"></div>
 </div>
 
+<!-- 🔥 CHARACTER CS -->
+<img src="https://raw.githubusercontent.com/ERSNET-art/ersnet/main/cs.png" class="character">
+
 <script>
-// 🔥 FORMAT NOMOR
+// FORMAT NOMOR
 function formatInput(val){
   val = val.replace(/\D/g, "");
 
@@ -98,7 +133,7 @@ function formatInput(val){
   return val;
 }
 
-// 🔍 CEK TAGIHAN
+// CEK TAGIHAN
 function cekTagihan(){
 
   var input = document.getElementById("input").value.trim();
@@ -138,7 +173,7 @@ function cekTagihan(){
 
           <hr>
 
-          <b>Jika sudah melakukan pembayaran, Silahkan upload bukti pembayaran anda:</b><br>
+          <b>Jika sudah melakukan pembayaran, upload bukti:</b><br>
           <input type="file" id="bukti" accept="image/*"><br>
           <button onclick="uploadBukti('${res.no_layanan}','${res.nama}')">Kirim Bukti</button>
         `;
@@ -166,8 +201,7 @@ function cekTagihan(){
   });
 }
 
-
-// 📸 UPLOAD BUKTI
+// UPLOAD BUKTI
 function uploadBukti(no_layanan, nama){
 
   var fileInput = document.getElementById("bukti");
