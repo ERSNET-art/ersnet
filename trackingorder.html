@@ -170,7 +170,7 @@ function cekOrder(){
   btn.disabled = true;
   btn.innerText = "Memproses...";
 
-  fetch("https://script.google.com/macros/s/AKfycbyH-qNN9seTnTJa4KVi6dtfH-6XVC4xivx676aaLKGJl8RQGfiu002ocQfUFdRp-U0OjA/exec?order_id=" + id)
+  fetch("https://script.google.com/macros/s/AKfycbyH-qNN9seTnTJa4KVi6dtfH-6XVC4xivx676aaLKGJl8RQGfiu002ocQfUFdRp-U0OjA/exec" + id)
   .then(res => res.json())
   .then(res => {
 
