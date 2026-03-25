@@ -82,20 +82,23 @@ function cekTagihan(){
 
 function uploadBukti(){
   var file = document.getElementById("bukti").files[0];
-  if(!file){ alert("Pilih file dulu!"); return; }
+
+  if(!file){
+    alert("Pilih file dulu!");
+    return;
+  }
 
   var reader = new FileReader();
-  reader.onloadend = function(){
-    var base64 = reader.result;
 
+  reader.onloadend = function(){
+    // Hanya kirim nama & no_layanan, jangan kirim base64
     fetch("https://script.google.com/macros/s/AKfycbwgVRi6-qmCeH9Q49uURfY_n4Od_iMN8n0vuaU8SS37n4UjvpEpIFY3u5RLJcEizevo/exec", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         type: "bukti",
         nama: window.nama,
         no_layanan: window.no_layanan,
-        foto: base64
+        // foto: base64  << hapus ini
       })
     })
     .then(res => res.json())
@@ -104,11 +107,10 @@ function uploadBukti(){
         alert("✅ Bukti berhasil dikirim");
         location.reload();
       } else {
-        alert("❌ Upload gagal: " + (res.message || ""));
+        alert("❌ Upload gagal");
       }
     })
-    .catch(err => {
-      console.error(err);
+    .catch(() => {
       alert("❌ Upload gagal (koneksi)");
     });
   };
