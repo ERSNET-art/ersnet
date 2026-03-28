@@ -344,7 +344,10 @@ function kirimData(){
   })
   .then(r=>r.json())
   .then(res=>{
-    alert("Order ID: "+res.order_id);
+    alert(
+      "Terimakasih telah mempercayai ErsNet sebagai Layanan Internet pilihan anda,\n\n" +
+      "Order ID anda adalah: " + res.order_id + "\n\n" +
+      "Silahkan cek pada menu Track Order Baru atau hubungi CS."
     location.reload();
   })
   .catch(()=> alert("Gagal kirim"));
