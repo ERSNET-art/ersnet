@@ -83,20 +83,6 @@ button {
   display: none;
 }
 
-.loader {
-  border: 3px solid #fff;
-  border-top: 3px solid yellow;
-  border-radius: 50%;
-  width: 14px;
-  height: 14px;
-  display: inline-block;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  100% { transform: rotate(360deg); }
-}
-
 .character {
   position: fixed;
   right: 10px;
@@ -329,9 +315,6 @@ function kirimData(){
     alert("Lengkapi data!");
     return;
   }
-
-  btn.innerHTML = '<span class="loader"></span> Mengirim...';
-  btn.disabled = true;
 
   fetch("https://script.google.com/macros/s/AKfycbyH-qNN9seTnTJa4KVi6dtfH-6XVC4xivx676aaLKGJl8RQGfiu002ocQfUFdRp-U0OjA/exec", {
     method:"POST",
