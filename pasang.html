@@ -15,19 +15,9 @@ body {
   color: white;
 }
 
-.header {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-}
-
-.logo-right {
-  width: 100px;
-}
-
 .container {
   max-width: 500px;
-  margin: 120px auto;
+  margin: 50px auto;
   background: white;
   color: black;
   padding: 25px;
@@ -41,6 +31,17 @@ input, textarea {
   margin-bottom: 15px;
   border-radius: 8px;
   border: 1px solid #ccc;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #1e5fa8;
+  color: white;
+  margin-top: 5px;
+  cursor: pointer;
 }
 
 .paket {
@@ -62,50 +63,25 @@ input, textarea {
   background: #e3f0ff;
 }
 
-button {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  background: #1e5fa8;
-  color: white;
-  margin-top: 5px;
-  cursor: pointer;
-}
-
 #map {
   height: 300px;
   border-radius: 10px;
   margin-top: 10px;
   display: none;
 }
-
-.character {
-  position: fixed;
-  right: 10px;
-  bottom: 0;
-  width: 150px;
-}
 </style>
 </head>
 
 <body>
 
-<div class="header">
-  <img src="L_ERS.png" class="logo-right">
-</div>
-
 <div class="container">
+
 <h3 style="text-align:center;">Isi data untuk berlangganan ERSnet</h3>
 
 <input type="text" id="nama" placeholder="Nama Lengkap">
 <input type="text" id="nohp" placeholder="Nomor WhatsApp">
 <textarea id="alamat" placeholder="Alamat Lengkap"></textarea>
 
-<b>Pilih Paket:</b>
-<div class="paket" id="paketContainer"></div>
-
-<br>
 <b>Pilih Lokasi:</b>
 <button onclick="modeLokasi('gps')">📍 Lokasi Saat Ini</button>
 <button onclick="modeLokasi('map')">🗺 Pilih di Peta</button>
@@ -113,13 +89,18 @@ button {
 <p id="lokasiText"></p>
 <div id="map"></div>
 
+<!-- 🔥 PAKET DI SINI (SETELAH LOKASI) -->
+<div id="paketSection" style="display:none;">
+  <b>Pilih Paket:</b>
+  <div class="paket" id="paketContainer"></div>
+</div>
+
 <label><b>Foto Rumah</b></label>
 <input type="file" id="foto">
 
-<button id="btnKirim" onclick="kirimData()">Kirim</button>
-</div>
+<button onclick="kirimData()">Kirim</button>
 
-<img src="cs.png" class="character">
+</div>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdDFUbkc6peaordAoRzWw27JvIHpdcZ4w"></script>
 
@@ -151,16 +132,16 @@ function modeLokasi(mode){
       alert("Gagal ambil lokasi");
     });
 
-    document.getElementById("map").style.display="none";
+    map.style.display="none";
   }
 
   if(mode==="map"){
-    document.getElementById("map").style.display="block";
+    map.style.display="block";
     initMap();
   }
 }
 
-/* INIT MAP */
+/* MAP */
 function initMap(){
   if(mapObj) return;
 
@@ -187,11 +168,12 @@ function initMap(){
   });
 }
 
-/* GET KABUPATEN */
+/* AMBIL KABUPATEN DARI KOORDINAT */
 function getKabupaten(lat, lng){
   const geocoder = new google.maps.Geocoder();
 
   geocoder.geocode({ location: {lat:lat, lng:lng} }, function(results, status){
+
     if(status === "OK" && results[0]){
       let kab = "";
 
@@ -201,23 +183,40 @@ function getKabupaten(lat, lng){
         }
       });
 
+      if(!kab){
+        fallbackAlamat();
+        return;
+      }
+
       lokasiText.innerText += "\nKabupaten: "+kab;
 
       tentukanCluster(kab);
+    } else {
+      fallbackAlamat();
     }
   });
 }
 
+/* FALLBACK KE ALAMAT MANUAL */
+function fallbackAlamat(){
+  if(alamat.value){
+    lokasiText.innerText += "\nAmbil dari alamat...";
+    tentukanCluster(alamat.value);
+  } else {
+    alert("Kabupaten tidak terbaca & alamat kosong!");
+  }
+}
+
 /* TENTUKAN CLUSTER */
-function tentukanCluster(kabupaten){
-  kabupaten = kabupaten.toUpperCase();
+function tentukanCluster(text){
+  text = text.toUpperCase();
 
   const barat = ["SURAKARTA","SUKOHARJO","BOYOLALI"];
   const timur = ["KARANGANYAR","SRAGEN","WONOGIRI","KLATEN"];
 
-  if(barat.some(k => kabupaten.includes(k))){
+  if(barat.some(k => text.includes(k))){
     cluster = "BARAT";
-  } else if(timur.some(k => kabupaten.includes(k))){
+  } else if(timur.some(k => text.includes(k))){
     cluster = "TIMUR";
   } else {
     cluster = "UNKNOWN";
@@ -231,6 +230,9 @@ function tentukanCluster(kabupaten){
 /* RENDER PAKET */
 function renderPaket(){
   let el = document.getElementById("paketContainer");
+  let section = document.getElementById("paketSection");
+
+  section.style.display = "block";
 
   if(cluster === "BARAT"){
     el.innerHTML = `
@@ -269,15 +271,10 @@ foto.onchange = function(){
 
 /* KIRIM */
 function kirimData(){
-  let btn = document.getElementById("btnKirim");
-
   if(!nama.value || !nohp.value || !alamat.value || !paketDipilih){
     alert("Lengkapi data!");
     return;
   }
-
-  btn.innerHTML = "Mengirim...";
-  btn.disabled = true;
 
   fetch("https://script.google.com/macros/s/AKfycbyH-qNN9seTnTJa4KVi6dtfH-6XVC4xivx676aaLKGJl8RQGfiu002ocQfUFdRp-U0OjA/exec", {
     method:"POST",
@@ -296,11 +293,7 @@ function kirimData(){
     alert("Order ID: "+res.order_id);
     location.reload();
   })
-  .catch(()=> alert("Gagal kirim"))
-  .finally(()=>{
-    btn.innerHTML="Kirim";
-    btn.disabled=false;
-  });
+  .catch(()=> alert("Gagal kirim"));
 }
 </script>
 
