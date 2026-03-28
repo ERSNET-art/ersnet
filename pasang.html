@@ -15,6 +15,19 @@ body {
   color: white;
 }
 
+.header {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.logo-left, .logo-right {
+  width: 100px;
+}
+  
 .container {
   max-width: 500px;
   margin: 50px auto;
@@ -69,14 +82,40 @@ button {
   margin-top: 10px;
   display: none;
 }
+
+.loader {
+  border: 3px solid #fff;
+  border-top: 3px solid yellow;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+.character {
+  position: fixed;
+  right: 10px;
+  bottom: 0;
+  width: 150px;
+}
+
 </style>
 </head>
 
 <body>
 
+<div class="header">
+  <img src="L_ERS.png" class="logo-right">
+</div>
+
 <div class="container">
 
-<h3 style="text-align:center;">Isi data untuk berlangganan ERSnet</h3>
+<h3 style="text-align:center;">Untuk bisa berlangganan layanan ERSnet silahkan isi beberapa data berikut ya,</h3>
 
 <input type="text" id="nama" placeholder="Nama Lengkap">
 <input type="text" id="nohp" placeholder="Nomor WhatsApp">
@@ -99,6 +138,8 @@ button {
 <input type="file" id="foto">
 
 <button onclick="kirimData()">Kirim</button>
+
+<img src="cs.png" class="character">
 
 </div>
 
@@ -288,6 +329,9 @@ function kirimData(){
     alert("Lengkapi data!");
     return;
   }
+
+  btn.innerHTML = '<span class="loader"></span> Mengirim...';
+  btn.disabled = true;
 
   fetch("https://script.google.com/macros/s/AKfycbyH-qNN9seTnTJa4KVi6dtfH-6XVC4xivx676aaLKGJl8RQGfiu002ocQfUFdRp-U0OjA/exec", {
     method:"POST",
