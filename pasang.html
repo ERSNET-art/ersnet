@@ -120,17 +120,30 @@ function pilihPaket(el){
 function modeLokasi(mode){
 
   if(mode==="gps"){
-    navigator.geolocation.getCurrentPosition(pos=>{
-      let lat = pos.coords.latitude;
-      let lng = pos.coords.longitude;
+navigator.geolocation.getCurrentPosition(pos=>{
+  let lat = pos.coords.latitude;
+  let lng = pos.coords.longitude;
 
-      lokasi = lat+","+lng;
-      lokasiText.innerText = "Lokasi: "+lokasi;
+  lokasi = lat+","+lng;
+  lokasiText.innerText = "Lokasi: "+lokasi;
 
-      getKabupaten(lat,lng);
-    }, ()=>{
-      alert("Gagal ambil lokasi");
-    });
+  // 🔥 coba ambil kabupaten dari koordinat
+  getKabupaten(lat,lng);
+
+  // 🔥 fallback otomatis kalau gagal
+  setTimeout(()=>{
+    if(!cluster){
+      console.log("Fallback ke alamat manual...");
+      fallbackAlamat();
+    }
+  }, 2000);
+
+}, ()=>{
+  alert("Gagal ambil lokasi");
+
+  // 🔥 fallback kalau GPS gagal total
+  fallbackAlamat();
+});
 
     map.style.display="none";
   }
