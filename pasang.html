@@ -265,8 +265,8 @@ function fallbackAlamat(){
 function tentukanCluster(text){
   text = text.toUpperCase();
 
-  const barat = ["SURAKARTA","SUKOHARJO","BOYOLALI"];
-  const timur = ["KARANGANYAR","SRAGEN","WONOGIRI","KLATEN"];
+  const barat = ["SURAKARTA","SUKOHARJO","BOYOLALI","KLATEN];
+  const timur = ["KARANGANYAR","SRAGEN","WONOGIRI"];
 
   if(barat.some(k => text.includes(k))){
     cluster = "BARAT";
