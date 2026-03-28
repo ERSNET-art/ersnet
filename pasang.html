@@ -18,13 +18,10 @@ body {
 .header {
   position: absolute;
   top: 20px;
-  left: 20px;
   right: 20px;
-  display: flex;
-  justify-content: flex-end;
 }
 
-.logo-left, .logo-right {
+.logo-right {
   width: 100px;
 }
 
@@ -83,20 +80,6 @@ button {
   display: none;
 }
 
-.loader {
-  border: 3px solid #fff;
-  border-top: 3px solid yellow;
-  border-radius: 50%;
-  width: 14px;
-  height: 14px;
-  display: inline-block;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  100% { transform: rotate(360deg); }
-}
-
 .character {
   position: fixed;
   right: 10px;
@@ -113,19 +96,14 @@ button {
 </div>
 
 <div class="container">
-<h2 style="text-align:center;">Untuk dapat berlangganan ErsNet Silahkan isi beberapa data dibawah ini ya</h2>
+<h3 style="text-align:center;">Isi data untuk berlangganan ERSnet</h3>
 
 <input type="text" id="nama" placeholder="Nama Lengkap">
 <input type="text" id="nohp" placeholder="Nomor WhatsApp">
 <textarea id="alamat" placeholder="Alamat Lengkap"></textarea>
 
 <b>Pilih Paket:</b>
-<div class="paket">
-  <div class="card" onclick="pilihPaket(this)">15 Mbps<br>125rb</div>
-  <div class="card" onclick="pilihPaket(this)">20 Mbps<br>150rb</div>
-  <div class="card" onclick="pilihPaket(this)">35 Mbps<br>175rb</div>
-  <div class="card" onclick="pilihPaket(this)">55 Mbps<br>230rb</div>
-</div>
+<div class="paket" id="paketContainer"></div>
 
 <br>
 <b>Pilih Lokasi:</b>
@@ -135,7 +113,7 @@ button {
 <p id="lokasiText"></p>
 <div id="map"></div>
 
-<label><b>Masukkan Foto Rumah</b></label>
+<label><b>Foto Rumah</b></label>
 <input type="file" id="foto">
 
 <button id="btnKirim" onclick="kirimData()">Kirim</button>
@@ -143,12 +121,12 @@ button {
 
 <img src="cs.png" class="character">
 
-<!-- 🔥 API KEY SUDAH DIPASANG -->
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdDFUbkc6peaordAoRzWw27JvIHpdcZ4w"></script>
 
 <script>
 let paketDipilih="", lokasi="", fotoBase64="";
 let mapObj, marker;
+let cluster = "";
 
 /* PILIH PAKET */
 function pilihPaket(el){
@@ -162,11 +140,17 @@ function modeLokasi(mode){
 
   if(mode==="gps"){
     navigator.geolocation.getCurrentPosition(pos=>{
-      lokasi = pos.coords.latitude+","+pos.coords.longitude;
+      let lat = pos.coords.latitude;
+      let lng = pos.coords.longitude;
+
+      lokasi = lat+","+lng;
       lokasiText.innerText = "Lokasi: "+lokasi;
+
+      getKabupaten(lat,lng);
     }, ()=>{
       alert("Gagal ambil lokasi");
     });
+
     document.getElementById("map").style.display="none";
   }
 
@@ -176,13 +160,13 @@ function modeLokasi(mode){
   }
 }
 
-/* MAP */
+/* INIT MAP */
 function initMap(){
   if(mapObj) return;
 
   mapObj = new google.maps.Map(document.getElementById("map"), {
-    center:{lat:-2.5,lng:140.7},
-    zoom:13
+    center:{lat:-7.57,lng:110.82},
+    zoom:12
   });
 
   mapObj.addListener("click", function(e){
@@ -193,9 +177,87 @@ function initMap(){
       map:mapObj
     });
 
-    lokasi = e.latLng.lat()+","+e.latLng.lng();
+    let lat = e.latLng.lat();
+    let lng = e.latLng.lng();
+
+    lokasi = lat+","+lng;
     lokasiText.innerText = "Lokasi dipilih: "+lokasi;
+
+    getKabupaten(lat,lng);
   });
+}
+
+/* GET KABUPATEN */
+function getKabupaten(lat, lng){
+  const geocoder = new google.maps.Geocoder();
+
+  geocoder.geocode({ location: {lat:lat, lng:lng} }, function(results, status){
+    if(status === "OK" && results[0]){
+      let kab = "";
+
+      results[0].address_components.forEach(c=>{
+        if(c.types.includes("administrative_area_level_2")){
+          kab = c.long_name;
+        }
+      });
+
+      lokasiText.innerText += "\nKabupaten: "+kab;
+
+      tentukanCluster(kab);
+    }
+  });
+}
+
+/* TENTUKAN CLUSTER */
+function tentukanCluster(kabupaten){
+  kabupaten = kabupaten.toUpperCase();
+
+  const barat = ["SURAKARTA","SUKOHARJO","BOYOLALI"];
+  const timur = ["KARANGANYAR","SRAGEN","WONOGIRI","KLATEN"];
+
+  if(barat.some(k => kabupaten.includes(k))){
+    cluster = "BARAT";
+  } else if(timur.some(k => kabupaten.includes(k))){
+    cluster = "TIMUR";
+  } else {
+    cluster = "UNKNOWN";
+  }
+
+  lokasiText.innerText += "\nCluster: "+cluster;
+
+  renderPaket();
+}
+
+/* RENDER PAKET */
+function renderPaket(){
+  let el = document.getElementById("paketContainer");
+
+  if(cluster === "BARAT"){
+    el.innerHTML = `
+      <div class="card" onclick="pilihPaket(this)">15 Mbps<br>125rb</div>
+      <div class="card" onclick="pilihPaket(this)">20 Mbps<br>150rb</div>
+      <div class="card" onclick="pilihPaket(this)">35 Mbps<br>175rb</div>
+      <div class="card" onclick="pilihPaket(this)">55 Mbps<br>230rb</div>
+      <div class="card" onclick="pilihPaket(this)">Bundling 12 Bulan</div>
+      <div class="card" onclick="pilihPaket(this)">Bundling 4 Bulan</div>
+    `;
+  }
+
+  else if(cluster === "TIMUR"){
+    el.innerHTML = `
+      <div class="card" onclick="pilihPaket(this)">10 Mbps<br>110rb</div>
+      <div class="card" onclick="pilihPaket(this)">20 Mbps<br>150rb</div>
+      <div class="card" onclick="pilihPaket(this)">30 Mbps<br>190rb</div>
+      <div class="card" onclick="pilihPaket(this)">50 Mbps<br>230rb</div>
+      <div class="card" onclick="pilihPaket(this)">Bundling 12 Bulan</div>
+      <div class="card" onclick="pilihPaket(this)">Bundling 6 Bulan</div>
+      <div class="card" onclick="pilihPaket(this)">Bundling 4 Bulan</div>
+    `;
+  }
+
+  else{
+    el.innerHTML = `<p style="color:red;">Wilayah belum tercover</p>`;
+  }
 }
 
 /* FOTO */
@@ -205,7 +267,7 @@ foto.onchange = function(){
   reader.readAsDataURL(this.files[0]);
 };
 
-/* KIRIM DATA */
+/* KIRIM */
 function kirimData(){
   let btn = document.getElementById("btnKirim");
 
@@ -214,7 +276,7 @@ function kirimData(){
     return;
   }
 
-  btn.innerHTML = '<span class="loader"></span> Mengirim...';
+  btn.innerHTML = "Mengirim...";
   btn.disabled = true;
 
   fetch("https://script.google.com/macros/s/AKfycbyH-qNN9seTnTJa4KVi6dtfH-6XVC4xivx676aaLKGJl8RQGfiu002ocQfUFdRp-U0OjA/exec", {
@@ -225,17 +287,14 @@ function kirimData(){
       alamat:alamat.value,
       paket:paketDipilih,
       lokasi:lokasi,
+      cluster:cluster,
       foto:fotoBase64
     })
   })
   .then(r=>r.json())
   .then(res=>{
-    alert(
-      "Terimakasih telah mempercayai ErsNet sebagai Layanan Internet pilihan anda,\n\n" +
-      "Order ID anda adalah: " + res.order_id + "\n\n" +
-      "Silahkan cek pada menu Track Order Baru atau hubungi CS."
-    );
-    location.href="index.html";
+    alert("Order ID: "+res.order_id);
+    location.reload();
   })
   .catch(()=> alert("Gagal kirim"))
   .finally(()=>{
