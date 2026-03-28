@@ -14,7 +14,7 @@ body {
   background: linear-gradient(135deg, #0f2a44, #1e5fa8);
   color: white;
 }
-
+  
 .header {
   position: absolute;
   top: 20px;
@@ -84,25 +84,39 @@ button {
 }
 
 .loader {
-  border: 3px solid #fff;
-  border-top: 3px solid yellow;
+  border: 4px solid #fff;
+  border-top: 4px solid yellow;
   border-radius: 50%;
-  width: 14px;
-  height: 14px;
-  display: inline-block;
+  width: 40px;
+  height: 40px;
   animation: spin 1s linear infinite;
+  margin-bottom:10px;
 }
 
 @keyframes spin {
   100% { transform: rotate(360deg); }
 }
-
+  
 .character {
   position: fixed;
   right: 10px;
   bottom: 0;
   width: 150px;
 }
+  
+#loadingOverlay {
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.6);
+  z-index:999;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  color:white;
+}
+
 
 </style>
 </head>
@@ -128,7 +142,6 @@ button {
 <p id="lokasiText"></p>
 <div id="map"></div>
 
-<!-- 🔥 PAKET DI SINI (SETELAH LOKASI) -->
 <div id="paketSection" style="display:none;">
   <b>Pilih Paket:</b>
   <div class="paket" id="paketContainer"></div>
@@ -143,12 +156,27 @@ button {
 
 </div>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdDFUbkc6peaordAoRzWw27JvIHpdcZ4w"></script>
+<!-- LOADING -->
+<div id="loadingOverlay">
+  <div class="loader"></div>
+  <p id="loadingText">Memproses...</p>
+</div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdDFUbkc6peaordAoRzWw27JvIHpdcZ4w&loading=async"></script>
 
 <script>
 let paketDipilih="", lokasi="", fotoBase64="";
 let mapObj, marker;
 let cluster = "";
+
+/* LOADING */
+function showLoading(text="Memproses..."){
+  loadingOverlay.style.display = "flex";
+  loadingText.innerText = text;
+}
+function hideLoading(){
+  loadingOverlay.style.display = "none";
+}
 
 /* PILIH PAKET */
 function pilihPaket(el){
@@ -161,30 +189,30 @@ function pilihPaket(el){
 function modeLokasi(mode){
 
   if(mode==="gps"){
-navigator.geolocation.getCurrentPosition(pos=>{
-  let lat = pos.coords.latitude;
-  let lng = pos.coords.longitude;
 
-  lokasi = lat+","+lng;
-  lokasiText.innerText = "Lokasi: "+lokasi;
+    showLoading("Mengambil lokasi...");
 
-  // 🔥 coba ambil kabupaten dari koordinat
-  getKabupaten(lat,lng);
+    navigator.geolocation.getCurrentPosition(pos=>{
+      let lat = pos.coords.latitude;
+      let lng = pos.coords.longitude;
 
-  // 🔥 fallback otomatis kalau gagal
-  setTimeout(()=>{
-    if(!cluster){
-      console.log("Fallback ke alamat manual...");
+      lokasi = lat+","+lng;
+      lokasiText.innerText = "Lokasi: "+lokasi;
+
+      getKabupaten(lat,lng);
+
+      setTimeout(()=>{
+        if(!cluster){
+          fallbackAlamat();
+        }
+        hideLoading();
+      },2000);
+
+    }, ()=>{
+      hideLoading();
+      alert("Gagal ambil lokasi");
       fallbackAlamat();
-    }
-  }, 2000);
-
-}, ()=>{
-  alert("Gagal ambil lokasi");
-
-  // 🔥 fallback kalau GPS gagal total
-  fallbackAlamat();
-});
+    });
 
     map.style.display="none";
   }
@@ -199,12 +227,15 @@ navigator.geolocation.getCurrentPosition(pos=>{
 function initMap(){
   if(mapObj) return;
 
-  mapObj = new google.maps.Map(document.getElementById("map"), {
+  mapObj = new google.maps.Map(map, {
     center:{lat:-7.57,lng:110.82},
     zoom:12
   });
 
   mapObj.addListener("click", function(e){
+
+    showLoading("Memproses lokasi...");
+
     if(marker) marker.setMap(null);
 
     marker = new google.maps.Marker({
@@ -219,17 +250,18 @@ function initMap(){
     lokasiText.innerText = "Lokasi dipilih: "+lokasi;
 
     getKabupaten(lat,lng);
+
+    setTimeout(()=>hideLoading(),1500);
   });
 }
 
-/* AMBIL KABUPATEN DARI KOORDINAT */
-function getKabupaten(lat, lng){
+/* GET KABUPATEN */
+function getKabupaten(lat,lng){
   const geocoder = new google.maps.Geocoder();
 
-  geocoder.geocode({ location: {lat:lat, lng:lng} }, function(results, status){
-
-    if(status === "OK" && results[0]){
-      let kab = "";
+  geocoder.geocode({ location:{lat,lng} }, (results,status)=>{
+    if(status==="OK" && results[0]){
+      let kab="";
 
       results[0].address_components.forEach(c=>{
         if(c.types.includes("administrative_area_level_2")){
@@ -243,15 +275,15 @@ function getKabupaten(lat, lng){
       }
 
       lokasiText.innerText += "\nKabupaten: "+kab;
-
       tentukanCluster(kab);
+
     } else {
       fallbackAlamat();
     }
   });
 }
 
-/* FALLBACK KE ALAMAT MANUAL */
+/* FALLBACK */
 function fallbackAlamat(){
   if(alamat.value){
     lokasiText.innerText += "\nAmbil dari alamat...";
@@ -261,35 +293,31 @@ function fallbackAlamat(){
   }
 }
 
-/* TENTUKAN CLUSTER */
+/* CLUSTER */
 function tentukanCluster(text){
   text = text.toUpperCase();
 
   const barat = ["SURAKARTA","SUKOHARJO","BOYOLALI","KLATEN"];
   const timur = ["KARANGANYAR","SRAGEN","WONOGIRI"];
 
-  if(barat.some(k => text.includes(k))){
-    cluster = "BARAT";
-  } else if(timur.some(k => text.includes(k))){
-    cluster = "TIMUR";
+  if(barat.some(k=>text.includes(k))){
+    cluster="BARAT";
+  } else if(timur.some(k=>text.includes(k))){
+    cluster="TIMUR";
   } else {
-    cluster = "UNKNOWN";
+    cluster="UNKNOWN";
   }
 
   lokasiText.innerText += "\nCluster: "+cluster;
-
   renderPaket();
 }
 
-/* RENDER PAKET */
+/* RENDER */
 function renderPaket(){
-  let el = document.getElementById("paketContainer");
-  let section = document.getElementById("paketSection");
+  paketSection.style.display="block";
 
-  section.style.display = "block";
-
-  if(cluster === "BARAT"){
-    el.innerHTML = `
+  if(cluster==="BARAT"){
+    paketContainer.innerHTML=`
       <div class="card" onclick="pilihPaket(this)">15 Mbps<br>125rb</div>
       <div class="card" onclick="pilihPaket(this)">20 Mbps<br>150rb</div>
       <div class="card" onclick="pilihPaket(this)">35 Mbps<br>175rb</div>
@@ -297,10 +325,8 @@ function renderPaket(){
       <div class="card" onclick="pilihPaket(this)">Bundling 12 Bulan</div>
       <div class="card" onclick="pilihPaket(this)">Bundling 4 Bulan</div>
     `;
-  }
-
-  else if(cluster === "TIMUR"){
-    el.innerHTML = `
+  } else if(cluster==="TIMUR"){
+    paketContainer.innerHTML=`
       <div class="card" onclick="pilihPaket(this)">10 Mbps<br>110rb</div>
       <div class="card" onclick="pilihPaket(this)">20 Mbps<br>150rb</div>
       <div class="card" onclick="pilihPaket(this)">30 Mbps<br>190rb</div>
@@ -309,18 +335,16 @@ function renderPaket(){
       <div class="card" onclick="pilihPaket(this)">Bundling 6 Bulan</div>
       <div class="card" onclick="pilihPaket(this)">Bundling 4 Bulan</div>
     `;
-  }
-
-  else{
-    el.innerHTML = `<p style="color:red;">Wilayah belum tercover</p>`;
+  } else {
+    paketContainer.innerHTML=`<p style="color:red;">Wilayah belum tercover</p>`;
   }
 }
 
 /* FOTO */
-foto.onchange = function(){
-  let reader = new FileReader();
-  reader.onloadend = ()=> fotoBase64 = reader.result;
-  reader.readAsDataURL(this.files[0]);
+foto.onchange=e=>{
+  let r=new FileReader();
+  r.onloadend=()=>fotoBase64=r.result;
+  r.readAsDataURL(e.target.files[0]);
 };
 
 /* KIRIM */
@@ -330,9 +354,11 @@ function kirimData(){
     return;
   }
 
-  fetch("https://script.google.com/macros/s/AKfycbzwRIGiX-1E6u4ggwcuodm7LJCVDI07A_ke6mN_MAm9EaF8lr8TuxspH2padMfyECEdBg/exec", {
+  showLoading("Mengirim data...");
+
+  fetch("https://script.google.com/macros/s/AKfycbzwRIGiX-1E6u4ggwcuodm7LJCVDI07A_ke6mN_MAm9EaF8lr8TuxspH2padMfyECEdBg/exec",{
     method:"POST",
-    body: JSON.stringify({
+    body:JSON.stringify({
       nama:nama.value,
       nohp:nohp.value,
       alamat:alamat.value,
@@ -344,6 +370,7 @@ function kirimData(){
   })
   .then(r=>r.json())
   .then(res=>{
+    hideLoading();
     alert(
       "Terimakasih telah mempercayai ErsNet sebagai Layanan Internet pilihan anda,\n\n" +
       "Order ID anda adalah: " + res.order_id + "\n\n" +
@@ -351,7 +378,10 @@ function kirimData(){
     );
     location.reload();
   })
-  .catch(()=> alert("Gagal kirim"));
+  .catch(()=>{
+    hideLoading();
+    alert("Gagal kirim");
+  });
 }
 </script>
 
